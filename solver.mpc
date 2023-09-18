@@ -1,0 +1,52 @@
+number_of_users = 2
+
+number_of_input_params = 2 # token type, amount
+number_of_output_params = 2 # token type, amount
+params_per_user = number_of_input_params + number_of_output_params
+user = Array(number_of_users * params_per_user, sint)
+ptx_size = 28
+ptxs = Array(number_of_users * ptx_size, sint)
+
+# collect user intents
+
+for i in 0, 1:
+	@for_range(4)
+	def _(j):
+        	user[params_per_user * i + j] = sint.get_input_from(i)
+	@for_range(28)
+	def _(j):
+		ptxs[j] = sint.get_input_from(i)
+	
+
+print_ln('%s', ptxs[0].reveal())
+
+# 0 user 1: has: type
+# 1 user 1: has: amount
+# 2 user 1: wants: type
+# 3 user 1: wants: amount
+# 4 user 2: has: type
+# 5 user 2: has: amount
+# 6 user 2: wants: type
+# 7 user 2: wants: amount
+
+match_has_wants_type = user[0] == user[6]
+match_has_wants_amount = user[1] == user[7]
+match_wants_has_type = user[2] == user[4]
+match_wants_has_amount = user[3] == user[5]
+
+#print_ln('%s %s %s', match_has_wants_type.reveal(), match_has_wants_type.reveal(), match_has_wants_amount.reveal())
+#print_ln('%s', match_has_wants_amount.reveal())
+#print_ln('%s', .reveal())
+#print_ln('%s', .reveal())
+
+res = match_has_wants_type & match_has_wants_amount & match_wants_has_type & match_wants_has_amount
+
+@if_e(res.reveal())
+def _():
+	print_ln('intents can be matched: %s', res.reveal())
+	return ptxs
+@else_
+def _():
+	print_ln("Intents don't match")
+
+
