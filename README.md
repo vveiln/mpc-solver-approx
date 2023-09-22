@@ -35,10 +35,10 @@ The solver receives the intents and:
       4. from 1 and 3: `0 <= Y * H1 <= G * H1`,
       5. from 2 and 3: `0 <= X * H2 <= C * H2`
       6. define `X * H2 = Y * H1 = min(C * H2, G * H1) = W`. Note that with such choice none of the users overpays:
-        - let's assume `W = C * H2`. Then `X = C, Y = C * H2 / H1`. Can `C * H2 / H1 > G` (the value paid by `U2` be above the upper spend limit set by `U2`)?
-        - If yes, then `C * H2 > G * H1`, which is impossible because `C * H2 = min(C * H2, G * H1)` as defined in step 6.
-        - the same reasoning works for when `W = G * H1`
-      7. Define `X = W / H2, Y = W / H1`
-      8. Sanity check:
+          1. let's assume `W = C * H2`. Then `X = C, Y = C * H2 / H1`. Can `C * H2 / H1 > G` (the value paid by `U2` be above the upper spend limit set by `U2`)?
+          2. If yes, then `C * H2 > G * H1`, which is impossible because `C * H2 = min(C * H2, G * H1)` as defined in step 6.
+          3. the same reasoning works for when `W = G * H1`
+      8. Define `X = W / H2, Y = W / H1`
+      9. Sanity check:
          1. `W = C * H2, X = C, Y = C * H2 / H1, X : Y = H1 : H2`
          2. `W = G * H1, X = G * H1 / H2, Y = G, X : Y = H1 : H2`
