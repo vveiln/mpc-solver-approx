@@ -1,0 +1,85 @@
+
+# input parameters description
+# 0 u1: type t11
+# 1 u1: max t11 amount spent
+# 2 u1: type t12
+# 3 u1: ratio h1
+# 4 u1: ratio w1
+#
+# 5 u2: type t21
+# 6 u2: max t21 amount spent
+# 7 u2: type t22
+# 8 u2: ratio h2
+# 9 u2: ratio w2
+
+number_of_users = 2
+number_of_params = 5
+user = Array(number_of_users * number_of_params, sint)
+
+
+# fake ptx is just a bunch of random field elements
+# each user sends a ptx along with their intent
+ptx_size = 28 
+ptxs = Array(number_of_users * ptx_size, sint)
+
+# collect user intents and ptxs
+@for_range(number_of_users)
+def _(i):
+	@for_range(number_of_params)
+	def _(j):
+        	user[number_of_params * i + j] = sint.get_input_from(i)
+	@for_range(ptx_size)
+	def _(j):
+		ptxs[ptx_size * i + j] = sint.get_input_from(i)
+	
+
+# sanity check
+print_ln('%s', ptxs[0].reveal())
+
+
+# solver strategy start
+# 1. check types 
+
+match_w1_h2 = user[2] == user[5]
+match_h1_w2 = user[0] == user[7]
+
+@if((match_w1_h2 && match_h1_w2).reveal() != true)
+def _():
+	return ptxs 
+
+# 2. check ratio compatibility 
+# if h1 == w2, the values don't need to be changed. reassign for clarity of the following computations
+h1 = user[3]
+w1 = user[4]
+h2 = user[8]
+w2 = user[9]
+
+
+# if h1 != w2, need to compute coefficients to make them comparable 
+@if(user[3] != user[9])
+def _():
+# compute gcd, assign h1 and w2 to be equal
+
+# 3. determine values to be exchanged
+
+
+
+# 4 compute the transaction
+
+
+#print_ln('%s %s %s', match_has_wants_type.reveal(), match_has_wants_type.reveal(), match_has_wants_amount.reveal())
+#print_ln('%s', match_has_wants_amount.reveal())
+#print_ln('%s', .reveal())
+#print_ln('%s', .reveal())
+
+res = 0
+
+@if_e(res.reveal())
+def _():
+	print_ln('intents can be matched: %s', res.reveal())
+	return ptxs
+@else_
+def _():
+	print_ln("Intents don't match")
+
+
