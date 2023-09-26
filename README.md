@@ -24,8 +24,8 @@ The solver receives the intents and:
     2. the ratios are compatible:
         - if `H1 = W2`, check that `H2 >= W1`
         - otherwise:
-            - reassign `H1 = W2 = GCD(H1, W2)`, 
-            - multiply `H2` and `W1` by the corresponding coefficients (for `H2`: `GCD(H1, W2) / W2`, for `H1`: `GCD(H1, W2) / H1`) to preserve the original relation
+            - reassign `H1 = W2 = LCM(H1, W2)`, 
+            - multiply `H2` and `W1` by the corresponding coefficients (for `H2`: `LCM(H1, W2) / W2`, for `H1`: `LCM(H1, W2) / H1`) to preserve the original relation
             - check `H2 >= W1`
         - note that we can also check the other pair of equality equations (`W1 = H2` and `H1 >= W2`) instead. In the end what matters is that one pair contains equal values and the other pair has the H parameter bigger than the W parameter
 2. Determines the amount to be sent by each user wrt to the ratios and the max spend constraints. After the first step we have `H1 = W2, H2 >= W1`, the exchange ratio is `H1 : H2` (following the “give more” strategy described above. Otherwise the second parameter could be between `W1` and `H2`). To determine the exact values to be exchanged by U1 and U2:
