@@ -14,7 +14,7 @@
 
 number_of_users = 2
 number_of_params = 5
-user = Array(number_of_users * number_of_params, sint)
+intent = Array(number_of_users * number_of_params, sint)
 
 
 # fake ptx is just a bunch of random field elements
@@ -22,12 +22,14 @@ user = Array(number_of_users * number_of_params, sint)
 ptx_size = 28 
 ptxs = Array(number_of_users * ptx_size, sint)
 
-# collect user intents and ptxs
+# read user inputs
 @for_range(number_of_users)
 def _(i):
+	# read intents
 	@for_range(number_of_params)
 	def _(j):
-        	user[number_of_params * i + j] = sint.get_input_from(i)
+        	intent[number_of_params * i + j] = sint.get_input_from(i)
+	#read ptxs
 	@for_range(ptx_size)
 	def _(j):
 		ptxs[ptx_size * i + j] = sint.get_input_from(i)
@@ -38,27 +40,48 @@ print_ln('%s', ptxs[0].reveal())
 
 
 # solver strategy start
-# 1. check types 
+# 1. check types compatibility
 
-match_w1_h2 = user[2] == user[5]
-match_h1_w2 = user[0] == user[7]
+match_w1_h2 = intent[2] == intent[5]
+match_h1_w2 = intent[0] == intent[7]
 
-@if((match_w1_h2 && match_h1_w2).reveal() != true)
+# todo check reveal
+@if_e((match_w1_h2 & match_h1_w2).reveal() != True)
 def _():
-	return ptxs 
+	return ptxs # todo: more sensible return
 
 # 2. check ratio compatibility 
-# if h1 == w2, the values don't need to be changed. reassign for clarity of the following computations
-h1 = user[3]
-w1 = user[4]
-h2 = user[8]
-w2 = user[9]
+# if h1 == w2, the initial values don't need to be changed. reassign for clarity of the following computations
+h1 = intent[3]
+w1 = intent[4]
+h2 = intent[8]
+w2 = intent[9]
+
+#todo: switch to array storing
+def gcd(a, b):
+	@if_e((a * b).reveal() == 0) #todo: field issues?
+	def _():
+		return a + b
+	@else_
+	def _():
+		q = a // b
+		r = a % b
+		return gcd(b, r)
+
+def lcm(a, b):
+	return a * b / gcd(a, b)
 
 
 # if h1 != w2, need to compute coefficients to make them comparable 
-@if(user[3] != user[9])
+@if_e((h1 - w2).reveal() != 0)
 def _():
-# compute gcd, assign h1 and w2 to be equal
+        lcm_h1_w2 = lcm(h1, w2)
+        coef1 = lcm_h1_w2 / h1
+        coef2 = lcmh1_w2 / w2
+        h1 = lcm_h1_w2
+        w1 = w1 * coef1
+        h2 = h2 * coef2
+        w2 = lcm_h1_w2
 
 # 3. determine values to be exchanged
 
