@@ -25,15 +25,15 @@ ptxs = Array(number_of_users * ptx_size, sint)
 # read user inputs
 @for_range(number_of_users)
 def _(i):
-	# read intents
-	@for_range(number_of_params)
-	def _(j):
-        	intent[number_of_params * i + j] = sint.get_input_from(i)
-	#read ptxs
-	@for_range(ptx_size)
-	def _(j):
-		ptxs[ptx_size * i + j] = sint.get_input_from(i)
-	
+        # read intents
+        @for_range(number_of_params)
+        def _(j):
+            intent[number_of_params * i + j] = sint.get_input_from(i)
+        #read ptxs
+        @for_range(ptx_size)
+        def _(j):
+                ptxs[ptx_size * i + j] = sint.get_input_from(i)
+        
 
 # sanity check
 print_ln('%s', ptxs[0].reveal())
@@ -48,7 +48,11 @@ match_h1_w2 = intent[0] == intent[7]
 # todo check reveal
 @if_e((match_w1_h2 & match_h1_w2).reveal() != True)
 def _():
-	return ptxs # todo: more sensible return
+        return ptxs # todo: more sensible return
+
+@else_
+def _():
+    pass
 
 # 2. check ratio compatibility 
 # if h1 == w2, the initial values don't need to be changed. reassign for clarity of the following computations
@@ -59,29 +63,39 @@ w2 = intent[9]
 
 #todo: switch to array storing
 def gcd(a, b):
-	@if_e((a * b).reveal() == 0) #todo: field issues?
-	def _():
-		return a + b
-	@else_
-	def _():
-		q = a // b
-		r = a % b
-		return gcd(b, r)
+    c = sint(8)
+    d = sint(4)
+    print_ln('%s %s %s', c.reveal(), d.reveal(), c.int_div(d).reveal())
+#    @for_range(255)
+#    def _():
+#        print_ln('%s %s', a.reveal(), b.reveal())
+#        @if_e((a * b).reveal() == 0) #todo: field issues?
+#        def _():
+#            return a + b
+#        @else_
+#        def _():
+#            r = a - a.int_div(b) * b
+#            a = b
+#            b = r
+    return 0
 
 def lcm(a, b):
-	return a * b / gcd(a, b)
-
+        return (a * b).int_div(gcd(a, b))
 
 # if h1 != w2, need to compute coefficients to make them comparable 
-@if_e((h1 - w2).reveal() != 0)
+@if_e((intent[3] - intent[9]).reveal() != 0)
 def _():
-        lcm_h1_w2 = lcm(h1, w2)
-        coef1 = lcm_h1_w2 / h1
-        coef2 = lcmh1_w2 / w2
-        h1 = lcm_h1_w2
-        w1 = w1 * coef1
-        h2 = h2 * coef2
-        w2 = lcm_h1_w2
+    lcm_h1_w2 = lcm(intent[3], intent[9])
+    coef1 = lcm_h1_w2 / intent[3]
+    coef2 = lcm_h1_w2 / intent[9]
+    h1 = lcm_h1_w2
+    w1 = intent[4] * coef1
+    h2 = intent[8] * coef2
+    w2 = lcm_h1_w2
+
+@else_
+def _():
+    pass
 
 # 3. determine values to be exchanged
 
@@ -95,14 +109,14 @@ def _():
 #print_ln('%s', .reveal())
 #print_ln('%s', .reveal())
 
-res = 0
+res = sint(0)
 
 @if_e(res.reveal())
 def _():
-	print_ln('intents can be matched: %s', res.reveal())
-	return ptxs
+        print_ln('intents can be matched: %s', res.reveal())
+        return ptxs
 @else_
 def _():
-	print_ln("Intents don't match")
+        print_ln("Intents don't match")
 
 
