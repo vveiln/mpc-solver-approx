@@ -2,6 +2,13 @@
 ## Compilation params
 - field size = 28948022309329048855892746252171976963363056481941560715954676764349967630337 (Pasta p parameter)
 
+## How to run
+
+Assuming that mp-spdz is in the same dir as this repo (../MP-SPDZ-0.3.7/), 
+
+1. to generate random ptx params, run `python3 gen-params.py` (the swap intent is hardcoded)
+2. run `sh compile-run.sh strategy` to compile strategy.mpc
+
 ## Solving strategies
 
 ### First algorithm (two-party exact intent matching)
