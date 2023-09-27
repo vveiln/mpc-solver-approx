@@ -1,97 +1,96 @@
-
-# input parameters description
-# 0 u1: type t11
-# 1 u1: max t11 amount spent
-# 2 u1: type t12
-# 3 u1: ratio h1
-# 4 u1: ratio w1
-#
-# 5 u2: type t21
-# 6 u2: max t21 amount spent
-# 7 u2: type t22
-# 8 u2: ratio h2
-# 9 u2: ratio w2
-
 number_of_users = 2
-number_of_params = 5
-intent = Array(number_of_users * number_of_params, sint)
-
+number_of_params = 5 # type, type, ratioh, ratiow, limit
+intent = sint.Matrix(number_of_users, number_of_params)
 
 # fake ptx is just a bunch of random field elements
 # each user sends a ptx along with their intent
 ptx_size = 28 
-ptxs = Array(number_of_users * ptx_size, sint)
+ptxs = sint.Matrix(number_of_users, ptx_size)
 
 # read user inputs
 @for_range(number_of_users)
 def _(i):
-        # read intents
-        @for_range(number_of_params)
-        def _(j):
-            intent[number_of_params * i + j] = sint.get_input_from(i)
-        #read ptxs
-        @for_range(ptx_size)
-        def _(j):
-                ptxs[ptx_size * i + j] = sint.get_input_from(i)
-        
-
-# sanity check
-print_ln('%s', ptxs[0].reveal())
-
+    # read intents
+    @for_range(number_of_params)
+    def _(j):
+        intent[i][j] = sint.get_input_from(i)
+    #read ptxs
+    @for_range(ptx_size)
+    def _(j):
+        ptxs[i][j] = sint.get_input_from(i)
 
 # solver strategy start
 # 1. check types compatibility
 
-match_w1_h2 = intent[2] == intent[5]
-match_h1_w2 = intent[0] == intent[7]
+def check_compatibility(h1, w1, h2, w2):
+    return (h1 == w2) & (h2 == w1)
 
 # todo check reveal
-@if_e((match_w1_h2 & match_h1_w2).reveal() != True)
+@if_e((check_compatibility(intent[0][0], intent[0][1], intent[1][0], intent[1][1])).reveal() != True)
 def _():
         return ptxs # todo: more sensible return
 
+# todo: more sensible structure
 @else_
 def _():
     pass
 
 # 2. check ratio compatibility 
 # if h1 == w2, the initial values don't need to be changed. reassign for clarity of the following computations
-h1 = intent[3]
-w1 = intent[4]
-h2 = intent[8]
-w2 = intent[9]
+ratio = Array(4, sint)
+ratio[0] = intent[0][3]
+ratio[1] = intent[0][4]
+ratio[2] = intent[1][3]
+ratio[3] = intent[1][4]
 
-#todo: switch to array storing
+def check_ratio(h1, w1, h2, w2):
+    print_ln("%s:%s %s:%s", h1.reveal(), w1.reveal(), h2.reveal(), w2.reveal())
+    return (h1 == w2) & (h2 >= w1)
+
+print_ln("%s:%s %s:%s", ratio[0].reveal(), ratio[1].reveal(), ratio[2].reveal(), ratio[3].reveal())
+
+# forgive me this awful impelementation and i promise to rewrite it in a more sensible way later
 def gcd(a, b):
-    c = sint(8)
-    d = sint(4)
-    print_ln('%s %s %s', c.reveal(), d.reveal(), c.int_div(d).reveal())
-#    @for_range(255)
-#    def _():
-#        print_ln('%s %s', a.reveal(), b.reveal())
-#        @if_e((a * b).reveal() == 0) #todo: field issues?
-#        def _():
-#            return a + b
-#        @else_
-#        def _():
-#            r = a - a.int_div(b) * b
-#            a = b
-#            b = r
-    return 0
+    aa = Array(8, sint) # log(255, 2) for approx number of iterations needed
+    ba = Array(8, sint)
+    ra = Array(8, sint)
+    aa[0] = a
+    ba[0] = b
+    ret = Array(1, sint)
+    ret[0] = 1 # idk how to make value mutable otherwise
+    @for_range(8)
+    def _(i):
+        @if_e((aa[i] + ba[i]).reveal() != 0)
+        def _():
+            @if_e(((aa[i] * ba[i]).reveal() == 0)) #todo: field issues?
+            def _():
+                ret[0] = aa[i] + ba[i]
+                print_ln('Value return %s', ret.reveal())
+            @else_
+            def _():
+                ra[i] = aa[i] - (aa[i] / ba[i]) * ba[i]
+                aa[i + 1] = ba[i]
+                ba[i + 1] = ra[i]
+        @else_
+        def _():
+            pass
+    return ret[0]
 
 def lcm(a, b):
-        return (a * b).int_div(gcd(a, b))
+    return (a * b) / gcd(a, b)
 
 # if h1 != w2, need to compute coefficients to make them comparable 
-@if_e((intent[3] - intent[9]).reveal() != 0)
+@if_e((ratio[0] - ratio[3]).reveal() != 0)
 def _():
-    lcm_h1_w2 = lcm(intent[3], intent[9])
-    coef1 = lcm_h1_w2 / intent[3]
-    coef2 = lcm_h1_w2 / intent[9]
-    h1 = lcm_h1_w2
-    w1 = intent[4] * coef1
-    h2 = intent[8] * coef2
-    w2 = lcm_h1_w2
+    lcm_h1_w2 = lcm(ratio[0], ratio[3])
+    print_ln('%s', lcm_h1_w2.reveal())
+    coef1 = lcm_h1_w2 / ratio[0]
+    coef2 = lcm_h1_w2 / ratio[3]
+    ratio[0] = lcm_h1_w2
+    ratio[1] = ratio[1] * coef1
+    ratio[2] = ratio[2] * coef2
+    ratio[3] = lcm_h1_w2
+    print_ln("%s:%s %s:%s", ratio[0].reveal(), ratio[1].reveal(), ratio[2].reveal(), ratio[3].reveal())
 
 @else_
 def _():
@@ -99,17 +98,9 @@ def _():
 
 # 3. determine values to be exchanged
 
-
-
 # 4 compute the transaction
 
-
-#print_ln('%s %s %s', match_has_wants_type.reveal(), match_has_wants_type.reveal(), match_has_wants_amount.reveal())
-#print_ln('%s', match_has_wants_amount.reveal())
-#print_ln('%s', .reveal())
-#print_ln('%s', .reveal())
-
-res = sint(0)
+res = check_ratio(*ratio)
 
 @if_e(res.reveal())
 def _():
@@ -118,5 +109,5 @@ def _():
 @else_
 def _():
         print_ln("Intents don't match")
-
+        return ptxs
 
