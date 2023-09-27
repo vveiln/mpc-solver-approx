@@ -98,6 +98,13 @@ def _():
 
 # 3. determine values to be exchanged
 
+def min(a, b):
+    return (a > b) * b + (b > a) * a
+
+w = min(intent[0][4] * ratio[0], intent[1][4] * ratio[2])
+x = w / ratio[2]
+y = w / ratio[0]
+
 # 4 compute the transaction
 
 res = check_ratio(*ratio)
@@ -105,7 +112,7 @@ res = check_ratio(*ratio)
 @if_e(res.reveal())
 def _():
         print_ln('intents can be matched: %s', res.reveal())
-        return ptxs
+        return ptxs, x, y
 @else_
 def _():
         print_ln("Intents don't match")
