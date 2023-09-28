@@ -70,12 +70,12 @@ intents_compatibility = check_ratio(*ratio) & check_type(intent[0][0], intent[0]
 
 @if_e(intents_compatibility.reveal())
 def _():
-        print_ln('Intents can be matched: %s', intents_compatibility.reveal())
-        print_ln('U1 would spend at most  %s, sends %s and has %s left', intent[0][4].reveal(), x.reveal(), leftover1.reveal())
-        print_ln('U2 would spend at most %s, sends %s and has %s left', intent[1][4].reveal(), y.reveal(), leftover2.reveal())
+        print_ln('Intents are real')
+        print_ln('U1 limit: %s, sends %s and has %s left', intent[0][4].reveal(), x.reveal(), leftover1.reveal())
+        print_ln('U2 limit: %s, sends %s and has %s left', intent[1][4].reveal(), y.reveal(), leftover2.reveal())
         return ptxs, x, y, leftover1, leftover2
 @else_
 def _():
-        print_ln("Intents don't match")
+        print_ln("Intents aren't real")
         return ptxs
 

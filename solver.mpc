@@ -20,13 +20,13 @@ def check_compatibility(h1, w1, h2, w2):
 compatible_types = check_compatibility(intent[0][0], intent[0][2], intent[1][0], intent[1][2])
 compatible_amounts = check_compatibility(intent[0][1], intent[0][3], intent[1][1], intent[1][3])
 
-res = compatible_types & compatible_amounts
-@if_e(res.reveal())
+intents_compatibility = compatible_types & compatible_amounts
+@if_e(intents_compatibility.reveal())
 def _():
-        print_ln('intents can be matched: %s', res.reveal())
+        print_ln('Intents are real: %s')
         return ptxs
 @else_
 def _():
-        print_ln("Intents don't match")
+        print_ln("Intents aren't real")
         return ptxs
 
