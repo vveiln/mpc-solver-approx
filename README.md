@@ -6,7 +6,7 @@ This repository contains a benchmark for approximate solver strategies. User1 an
 The code in this repo is unstable, doesn't produce valid results, and cannot be used in production. Its sole purpose is to have an approximate estimation of strategy evaluation time. Partial transactions and transactions computations, that are required to output a proper transaction, are not included (it requires calling Taiga from inside the MPC framework).
 
 ## How to run
-Assuming that MP-SPDZ is in the same dir as this repo (`../MP-SPDZ-0.3.7/`), run `sh compile-run.sh strategy` to compile strategy.mpc
+Assuming that MP-SPDZ is in the same dir as this repo (so the path to MP-SPDZ is `../MP-SPDZ-0.3.7/`), run `sh compile-run.sh strategy` to compile `strategy.mpc`
 
 To generate ssl parameters, run `../MP-SPDZ-0.3.7/Scripts/setup-ssl.sh 3 ./Player-Data/` (the number of parties is `n + 1` bc the script generates keys starting from 0 and the MPC protocols expect keys starting from 1)
 
