@@ -53,7 +53,7 @@ The solver receives the intents and:
 
 ## Time
 
-||MPC|Time|Rounds|Data transferred|
+||MPC|Time|Data transferred|Rounds|
 |-|-|-|-|-|
 |First strategy|MASCOT|14.2871|863.2 MB|~563|
 |Second strategy|MASCOT|16.7435|1083.02 MB|~715|
