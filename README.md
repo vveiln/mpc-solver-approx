@@ -50,3 +50,12 @@ The solver receives the intents and:
 - To avoid using euclidean division with field elements to compute GCD (remainder computation is not supported by MP-SPDZ for field elements), `H1 * W2` is used instead of `LCM(H1, W2)`
 - To avoid overflowing in computation of `X` and `Y`, nothing is used, it overflows. To prevent that, you need to either implement real-field conversion (if you want to support sending non-integer values) or (simpler) to restrict sent values to field elements and check that division `W / H2` and `W / H1` will not overflow. Good luck (remember, there is no native way to compute a remainder for field elements)!
 - Note that it doesn't include partial transaction computation as a part of the strategy, which would take a lot of the computation for the second strategy (think of proof computations required for ptx)
+
+## Time
+
+||MPC|Time|Rounds|Data transferred|
+|-|-|-|-|-|
+|First strategy|MASCOT|14.2871|863.2 MB|~563|
+|Second strategy|MASCOT|16.7435|1083.02 MB|~715|
+
+Note that it doesn't make sense to compate times for both strategies as the first one doesn't require computation of new partial transactions, and the second one does.
