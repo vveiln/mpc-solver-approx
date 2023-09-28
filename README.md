@@ -8,6 +8,8 @@ The code in this repo is unstable, doesn't produce valid results, and cannot be 
 ## How to run
 Assuming that MP-SPDZ is in the same dir as this repo (`../MP-SPDZ-0.3.7/`), run `sh compile-run.sh strategy` to compile strategy.mpc
 
+To generate ssl parameters, run `../MP-SPDZ-0.3.7/Scripts/setup-ssl.sh 3 ./Player-Data/` (the number of parties is `n + 1` bc the script generates keys starting from 0 and the MPC protocols expect keys starting from 1)
+
 ## Solving strategies
 
 ### First algorithm (two-party exact intent matching)
