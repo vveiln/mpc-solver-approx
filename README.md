@@ -3,11 +3,7 @@
 - field size = 28948022309329048855892746252171976963363056481941560715954676764349967630337 (Pasta p parameter)
 
 ## How to run
-
-Assuming that mp-spdz is in the same dir as this repo (../MP-SPDZ-0.3.7/), 
-
-1. to generate random ptx params, run `python3 gen-params.py` (the swap intent is hardcoded)
-2. run `sh compile-run.sh strategy` to compile strategy.mpc
+Assuming that MP-SPDZ is in the same dir as this repo (`../MP-SPDZ-0.3.7/`), run `sh compile-run.sh strategy` to compile strategy.mpc
 
 ## Solving strategies
 
@@ -19,7 +15,7 @@ The solver receives the intents, and checks that:
 - `A = D` and `B = C` (asset types match)
 - `H1 = W2` and `H2 = W1` (amounts match)
 
-### Second algorithm (two-party intent matching, variable amounts)
+### Reasoning about the second algorithm (two-party intent matching, variable amounts)
 - `U1` has asset `A` and wants asset `B` and wants to trade them in relation `H1 : W1`, spending at most `C` of asset `A`.
 - `U2` has asset `E` and wants asset `F` and wants to trade them in relation `H2 : W2`, spending at most `G` of asset `E`.
 
@@ -49,3 +45,8 @@ The solver receives the intents and:
       9. Sanity check:
          1. `W = C * H2, X = C, Y = C * H2 / H1, X : Y = H1 : H2`
          2. `W = G * H1, X = G * H1 / H2, Y = G, X : Y = H1 : H2`
+
+### Implementation details
+- To avoid using euclidean division with field elements to compute GCD (remainder computation is not supported by MP-SPDZ for field elements), `H1 * W2` is used instead of `LCM(H1, W2)`
+- To avoid overflowing in computation of `X` and `Y`, nothing is used, it overflows. To prevent that, you need to either implement real-field conversion (if you want to support sending non-integer values) or (simpler) to restrict sent values to field elements and check that division `W / H2` and `W / H1` will not overflow. Good luck (remember, there is no native way to compute a remainder for field elements)!
+- Note that it doesn't include partial transaction computation as a part of the strategy, which would take a lot of the computation for the second strategy (think of proof computations required for ptx)
