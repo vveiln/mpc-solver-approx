@@ -23,7 +23,7 @@ compatible_amounts = check_compatibility(intent[0][1], intent[0][3], intent[1][1
 intents_compatibility = compatible_types & compatible_amounts
 @if_e(intents_compatibility.reveal())
 def _():
-        print_ln('Intents are real: %s')
+        print_ln('Intents are real')
         return ptxs
 @else_
 def _():

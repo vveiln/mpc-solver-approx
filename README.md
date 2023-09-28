@@ -59,6 +59,8 @@ The solver receives the intents and:
 ||MPC|Time|Data transferred|Rounds|
 |-|-|-|-|-|
 |First strategy|MASCOT|14.2871|863.2 MB|~563|
+||Shamir (honest majority, not malicious)|0.06|0.40 MB|~113|
 |Second strategy|MASCOT|16.7435|1083.02 MB|~715|
+||Shamir (honest majority, not malicious)|0.17|0.97|~165|
 
 Note that it doesn't make sense to compate times for both strategies as the first one doesn't require computation of new partial transactions, and the second one does.
