@@ -1,6 +1,9 @@
 # mpc-solver-approx
-## Compilation params
-- field size = 28948022309329048855892746252171976963363056481941560715954676764349967630337 (Pasta p parameter)
+
+This repository contains a benchmark for approximate solver strategies. User1 and User2 submit intents, solver strategy checks compatibility and (when possible) outputs a transaction
+
+⚠️  Warning ⚠️:
+The code in this repo is unstable, doesn't produce valid results, and cannot be used in production. Its sole purpose is to have an approximate estimation of strategy evaluation time. Partial transactions and transactions computations, that are required to output a proper transaction, are not included (it requires calling Taiga from inside the MPC framework).
 
 ## How to run
 Assuming that MP-SPDZ is in the same dir as this repo (`../MP-SPDZ-0.3.7/`), run `sh compile-run.sh strategy` to compile strategy.mpc
