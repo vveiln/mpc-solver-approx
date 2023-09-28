@@ -2,117 +2,81 @@ number_of_users = 2
 number_of_params = 5 # type, type, ratioh, ratiow, limit
 intent = sint.Matrix(number_of_users, number_of_params)
 
-# fake ptx is just a bunch of random field elements
+# a fake ptx is just a bunch of random field elements
 # each user sends a ptx along with their intent
-ptx_size = 28 
+ptx_size = 28 # approximate size of a partial transaction 
 ptxs = sint.Matrix(number_of_users, ptx_size)
 
 # read user inputs
 @for_range(number_of_users)
 def _(i):
-    # read intents
+    
     @for_range(number_of_params)
     def _(j):
         intent[i][j] = sint.get_input_from(i)
-    #read ptxs
+    
     @for_range(ptx_size)
     def _(j):
         ptxs[i][j] = sint.get_input_from(i)
 
-# solver strategy start
-# 1. check types compatibility
+ratio = Array(4, sint)
+ratio[0] = intent[0][2]
+ratio[1] = intent[0][3]
+ratio[2] = intent[1][2]
+ratio[3] = intent[1][3]
 
-def check_compatibility(h1, w1, h2, w2):
+print_ln("%s", ratio.reveal())
+
+# solver strategy
+
+def check_type(h1, w1, h2, w2):
     return (h1 == w2) & (h2 == w1)
 
-# todo check reveal
-@if_e((check_compatibility(intent[0][0], intent[0][1], intent[1][0], intent[1][1])).reveal() != True)
-def _():
-        return ptxs # todo: more sensible return
-
-# todo: more sensible structure
-@else_
-def _():
-    pass
-
-# 2. check ratio compatibility 
-# if h1 == w2, the initial values don't need to be changed. reassign for clarity of the following computations
-ratio = Array(4, sint)
-ratio[0] = intent[0][3]
-ratio[1] = intent[0][4]
-ratio[2] = intent[1][3]
-ratio[3] = intent[1][4]
-
 def check_ratio(h1, w1, h2, w2):
-    print_ln("%s:%s %s:%s", h1.reveal(), w1.reveal(), h2.reveal(), w2.reveal())
     return (h1 == w2) & (h2 >= w1)
 
-print_ln("%s:%s %s:%s", ratio[0].reveal(), ratio[1].reveal(), ratio[2].reveal(), ratio[3].reveal())
+# if h1 != w2, need to convert ratios to have a common base to make them comparable 
+# to avoid branching, do conversion even if h1 == w2
+# to avoid using gcd (remainder computation is not implemented in MP-SPDZ), just use h1 * w2 instead of lcm(h1, w2)
+common = ratio[0] * ratio[3]
+conversion_value1 = ratio[3]
+conversion_value2 = ratio[0]
 
-# forgive me this awful impelementation and i promise to rewrite it in a more sensible way later
-def gcd(a, b):
-    aa = Array(8, sint) # log(255, 2) for approx number of iterations needed
-    ba = Array(8, sint)
-    ra = Array(8, sint)
-    aa[0] = a
-    ba[0] = b
-    ret = Array(1, sint)
-    ret[0] = 1 # idk how to make value mutable otherwise
-    @for_range(8)
-    def _(i):
-        @if_e((aa[i] + ba[i]).reveal() != 0)
-        def _():
-            @if_e(((aa[i] * ba[i]).reveal() == 0)) #todo: field issues?
-            def _():
-                ret[0] = aa[i] + ba[i]
-                print_ln('Value return %s', ret.reveal())
-            @else_
-            def _():
-                ra[i] = aa[i] - (aa[i] / ba[i]) * ba[i]
-                aa[i + 1] = ba[i]
-                ba[i + 1] = ra[i]
-        @else_
-        def _():
-            pass
-    return ret[0]
-
-def lcm(a, b):
-    return (a * b) / gcd(a, b)
-
-# if h1 != w2, need to compute coefficients to make them comparable 
-@if_e((ratio[0] - ratio[3]).reveal() != 0)
-def _():
-    lcm_h1_w2 = lcm(ratio[0], ratio[3])
-    print_ln('%s', lcm_h1_w2.reveal())
-    coef1 = lcm_h1_w2 / ratio[0]
-    coef2 = lcm_h1_w2 / ratio[3]
-    ratio[0] = lcm_h1_w2
-    ratio[1] = ratio[1] * coef1
-    ratio[2] = ratio[2] * coef2
-    ratio[3] = lcm_h1_w2
-    print_ln("%s:%s %s:%s", ratio[0].reveal(), ratio[1].reveal(), ratio[2].reveal(), ratio[3].reveal())
-
-@else_
-def _():
-    pass
+ratio[0] = common
+ratio[1] = ratio[1] * conversion_value1
+ratio[2] = ratio[2] * conversion_value2
+ratio[3] = common
 
 # 3. determine values to be exchanged
 
-def min(a, b):
-    return (a > b) * b + (b > a) * a
+# WARNING: division overflow
+# as this computation involves at least euclidean division (if instead of computing real values we limit them to be integers only) 
+# and we can't compute remainders in a field using MP-SPDZ,
+# x and y might overflow depending on the exact combination of parameters
+# such situation should be prevented in real life as it will produce wrong values for x and y,
+# but I can't be bothered trying to hack around this (after a few hours of being bothered)
 
-w = min(intent[0][4] * ratio[0], intent[1][4] * ratio[2])
+w = (intent[0][4] * ratio[2]).min(intent[1][4] * ratio[0])
 x = w / ratio[2]
 y = w / ratio[0]
 
-# 4 compute the transaction
+print_ln('w: %s, x: %s, y: %s', w.reveal(), x.reveal(), y.reveal())
+# 4. compute the transaction params
+# Compute the amounts left
 
-res = check_ratio(*ratio)
+leftover1 = intent[0][4] - x
+leftover2 = intent[1][4] - y
 
-@if_e(res.reveal())
+# 5. Perform the checks and produce the transaction parameters (no actual ptx are computed here)
+
+intents_compatibility = check_ratio(*ratio) & check_type(intent[0][0], intent[0][1], intent[1][0], intent[1][1])
+
+@if_e(intents_compatibility.reveal())
 def _():
-        print_ln('intents can be matched: %s', res.reveal())
-        return ptxs, x, y
+        print_ln('Intents can be matched: %s', intents_compatibility.reveal())
+        print_ln('U1 would spend at most  %s, sends %s and has %s left', intent[0][4].reveal(), x.reveal(), leftover1.reveal())
+        print_ln('U2 would spend at most %s, sends %s and has %s left', intent[1][4].reveal(), y.reveal(), leftover2.reveal())
+        return ptxs, x, y, leftover1, leftover2
 @else_
 def _():
         print_ln("Intents don't match")

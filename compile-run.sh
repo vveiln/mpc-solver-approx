@@ -1,6 +1,7 @@
 DIR=MP-SPDZ-0.3.7
 FIELD=28948022309329048855892746252171976963363056481941560715954676764349967630337
 
+python3 gen_param.py
 cp ./$1.mpc ../$DIR/Programs/Source
 ../$DIR/Scripts/compile-run.py -E mascot $1 -P $FIELD
 
