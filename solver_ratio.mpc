@@ -68,14 +68,22 @@ leftover2 = intent[1][4] - y
 
 intents_compatibility = check_ratio(*ratio) & check_type(intent[0][0], intent[0][1], intent[1][0], intent[1][1])
 
+extra_ptx = Array(4, sint)
+extra_ptx[0] = x
+extra_ptx[1] = y
+extra_ptx[2] = leftover1
+extra_ptx[3] = leftover2
+
+output = ptxs, extra_ptx
+
 @if_e(intents_compatibility.reveal())
 def _():
         print_ln('Intents are real')
         print_ln('U1 limit: %s, sends %s and has %s left', intent[0][4].reveal(), x.reveal(), leftover1.reveal())
         print_ln('U2 limit: %s, sends %s and has %s left', intent[1][4].reveal(), y.reveal(), leftover2.reveal())
-        return ptxs, x, y, leftover1, leftover2
 @else_
 def _():
         print_ln("Intents aren't real")
-        return ptxs
+
+
 
